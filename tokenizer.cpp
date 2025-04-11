@@ -1,47 +1,7 @@
 #include "tokenizer.h"
 
 
-
-
-bool Tokenizer::consume_if(const char op)
-{
-    if (current_token->kind != TokenKind::TK_RESERVED || current_token->property.property_of_string.str[0] != op)   
-    {
-        return false;
-    }
-
-    current_token = current_token->next;
-    return true;
-}
-
-void Tokenizer::expect(const char op)
-{
-    if (current_token->kind != TokenKind::TK_RESERVED || current_token->property.property_of_string.str[0] != op)
-    {
-        print_error_info("%cではありません", op);
-    }
-
-    current_token = current_token->next;
-}
-
-int Tokenizer::expect_number()
-{
-    if (current_token->kind != TokenKind::TK_NUM)
-    {
-        print_error_info("数ではありません");
-    }
-
-    int val = current_token->property.property_of_num.val;
-    current_token = current_token->next;
-    return val;
-}
-
-bool Tokenizer::at_eof()
-{
-    return current_token->kind == TokenKind::TK_EOF;
-}
-
-void Tokenizer::print_error_info(char* location, const char* fmt, ...)
+void print_error_info(char* input_string, char* location, const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -55,7 +15,7 @@ void Tokenizer::print_error_info(char* location, const char* fmt, ...)
     exit(1);
 }
 
-void Tokenizer::print_error_info(const char* fmt, ...)
+void print_error_info(const char* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);
@@ -63,6 +23,47 @@ void Tokenizer::print_error_info(const char* fmt, ...)
     fprintf(stderr, "\n");
     exit(1);
 }
+
+
+bool Token::consume_if(const char op)
+{
+    if (current_token->kind != TokenKind::TK_RESERVED || current_token->property.property_of_string.str[0] != op)   
+    {
+        return false;
+    }
+
+    current_token = current_token->next;
+    return true;
+}
+
+void Token::expect(const char op)
+{
+    if (current_token->kind != TokenKind::TK_RESERVED || current_token->property.property_of_string.str[0] != op)
+    {
+        print_error_info("%cではありません", op);
+    }
+
+    current_token = current_token->next;
+}
+
+int Token::expect_number()
+{
+    if (current_token->kind != TokenKind::TK_NUM)
+    {
+        print_error_info("数ではありません");
+    }
+
+    int val = current_token->property.property_of_num.val;
+    current_token = current_token->next;
+    return val;
+}
+
+bool Token::at_eof()
+{
+    return current_token->kind == TokenKind::TK_EOF;
+}
+
+
 
 
 Token* create_new_token(TokenKind kind, Token* current_token, char* str, int strlen)
@@ -76,40 +77,47 @@ Token* create_new_token(TokenKind kind, Token* current_token, char* str, int str
     return new_token;
 }
 
-Token* Tokenizer::tokenize()
+
+void Token::tokenize(char* input_string)
 {
     Token head;
     head.next = nullptr;
-    Token* current_token = &head; 
+    Token* current_token_tmp = &head; 
 
     char* p = input_string;
 
     while(*p)
     {
+#if DEBUG
+        fprintf(stderr, "_%c_",*p);
+#endif
         if (isspace(*p))
         {
             p++;
             continue;
         }
 
-        if (*p == '+' || *p == '-')
+        if (strchr("+-*/()", *p))
         {
-            current_token = create_new_token(TokenKind::TK_RESERVED, current_token, p, 1);
+            current_token_tmp = create_new_token(TokenKind::TK_RESERVED, current_token_tmp, p, 1);
             p++;
             continue;
         }
 
         if (isdigit(*p))
         {
-            current_token = create_new_token(TokenKind::TK_NUM, current_token, p, 0);
-            current_token->property.property_of_num.val = strtol(p, &p, 10);
+            current_token_tmp = create_new_token(TokenKind::TK_NUM, current_token_tmp, p, 0);
+            current_token_tmp->property.property_of_num.val = strtol(p, &p, 10);
             continue;
         }
 
-        print_error_info(p, "トークナイズ出来ません : %c\n", *p);
+        print_error_info(input_string, p, "トークナイズ出来ません : %c\n", *p);
     }
 
-    create_new_token(TokenKind::TK_EOF, current_token, p, 0);
+    create_new_token(TokenKind::TK_EOF, current_token_tmp, p, 0);
 
-    return head.next;
+#if DEBUG
+    fprintf(stderr, "\n");
+#endif
+    current_token = head.next;
 }

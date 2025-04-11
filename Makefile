@@ -7,9 +7,13 @@ compiler.out: $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
 
-main.o: common.h
+main.o: common.h tokenizer.h parser.h code-generator.h
 
-tokenizer.o: tokenizer.h common.h
+tokenizer.o: common.h tokenizer.h 
+
+parser.o: common.h tokenizer.h parser.h
+
+code-generator.o: common.h parser.h code-generator.h
 
 test: compiler.out
 	./test.sh
