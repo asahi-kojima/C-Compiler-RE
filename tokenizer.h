@@ -18,11 +18,12 @@ struct Token
     union
     {
         struct {int val;} property_of_num;
-        struct {char* str; int strlen;} property_of_string;
+        struct {char* str; int strlen;} property_of_reserved;
     } property;
 
 
     static bool consume_if(const char op);
+    static bool consume_if(const char *op);
 
     static void expect(const char op);
 

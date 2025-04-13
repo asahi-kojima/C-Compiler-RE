@@ -35,6 +35,27 @@ void codeGenerator(Node* node)
         printf("    idiv rdi\n");
         break;
     
+    case NodeKind::ND_EQ:
+        printf("    cmp rax, rdi\n");
+        printf("    sete al\n");
+        printf("    movzb rax, al\n");
+        break;
+    case NodeKind::ND_NE:
+        printf("    cmp rax, rdi\n");
+        printf("    setne al\n");
+        printf("    movzb rax, al\n");
+        break;
+    case NodeKind::ND_LT:
+        printf("    cmp rax, rdi\n");
+        printf("    setl al\n");
+        printf("    movzb rax, al\n");
+        break;
+    case NodeKind::ND_LE:
+        printf("    cmp rax, rdi\n");
+        printf("    setle al\n");
+        printf("    movzb rax, al\n");
+        break;
+        
     default:
         fprintf(stderr, "can't reach here\n");
         exit(1);

@@ -22,15 +22,71 @@ ASTNode* create_new_node_num(int val)
 
 ASTNode* Parser::expr()
 {
+    return equality();
+}
+
+ASTNode* Parser::equality()
+{
+    ASTNode* node = relational();
+    
+    while(true)
+    {
+        if (Token::consume_if("=="))
+        {
+            node = create_new_node(ASTNodeKind::ND_EQ, node, relational());
+        }
+        else if (Token::consume_if("!="))
+        {
+            node = create_new_node(ASTNodeKind::ND_NE, node, relational());
+        }
+        else
+        {
+            return node;
+        }
+    }
+}
+
+
+ASTNode* Parser::relational()
+{
+    ASTNode* node = add();
+    
+    while(true)
+    {
+        if (Token::consume_if("<"))
+        {
+            node = create_new_node(ASTNodeKind::ND_LT, node, add());
+        }
+        else if (Token::consume_if("<="))
+        {
+            node = create_new_node(ASTNodeKind::ND_LE, node, add());
+        }
+        else if (Token::consume_if(">"))
+        {
+            node = create_new_node(ASTNodeKind::ND_LT, add(),node);
+        }
+        else if (Token::consume_if(">="))
+        {
+            node = create_new_node(ASTNodeKind::ND_LE, add(), node);
+        }
+        else
+        {
+            return node;
+        }
+    }
+}
+
+ASTNode* Parser::add()
+{
     ASTNode* node = mul();
     
     while(true)
     {
-        if (Token::consume_if('+'))
+        if (Token::consume_if("+"))
         {
             node = create_new_node(ASTNodeKind::ND_ADD, node, mul());
         }
-        else if (Token::consume_if('-'))
+        else if (Token::consume_if("-"))
         {
             node = create_new_node(ASTNodeKind::ND_SUB, node, mul());
         }
@@ -40,6 +96,7 @@ ASTNode* Parser::expr()
         }
     }
 }
+
 
 ASTNode* Parser::mul()
 {

@@ -8,6 +8,12 @@ enum class ASTNodeKind
     ND_SUB,
     ND_MUL,
     ND_DIV,
+
+    ND_EQ,
+    ND_NE,
+    ND_LT,
+    ND_LE,
+
     ND_NUM,
 };
 
@@ -35,6 +41,9 @@ class Parser
 {
 public:
     static ASTNode* expr();
+    static ASTNode* equality();
+    static ASTNode* relational();
+    static ASTNode* add();
     static ASTNode* mul();
     static ASTNode* unary();
     static ASTNode* primary();
